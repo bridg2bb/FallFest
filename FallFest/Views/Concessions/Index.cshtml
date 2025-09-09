@@ -128,17 +128,17 @@
                 itemDiv.className = 'bg-white rounded-lg p-3 shadow-md flex flex-col justify-between items-center text-center transition-transform hover:scale-105 hover:shadow-lg cursor-pointer';
 
                 itemDiv.innerHTML = `
-                            <h3 class="text-md font-bold text-gray-800">${item.itemName} (${count})</h3>
-                            <p class="text-lg font-semibold text-gray-600 mt-1">$${item.unitPrice.toFixed(2)}</p>
-                            <div class="flex gap-2 mt-2 w-full">
-                                <button class="add-item-btn flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105" data-item-id="${item.itemID}">
-                                    &plus;
-                                </button>
-                                    <button class="remove-item-btn flex-1 bg-red-500 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" data-item-id="${item.itemID}" ${count === 0 ? 'disabled' : ''}>
-                                    &minus;
-                                </button>
-                            </div>
-                        `;
+                                <h3 class="text-md font-bold text-gray-800">${item.itemName} (${count})</h3>
+                                <p class="text-lg font-semibold text-gray-600 mt-1">$${item.unitPrice.toFixed(2)}</p>
+                                <div class="flex gap-2 mt-2 w-full">
+                                    <button class="add-item-btn flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105" data-item-id="${item.itemID}">
+                                        &plus;
+                                    </button>
+                                        <button class="remove-item-btn flex-1 bg-red-500 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" data-item-id="${item.itemID}" ${count === 0 ? 'disabled' : ''}>
+                                        &minus;
+                                    </button>
+                                </div>
+                            `;
                 itemsContainer.appendChild(itemDiv);
             });
         }
@@ -159,12 +159,12 @@
                     const listItem = document.createElement('li');
                     listItem.className = 'flex justify-between items-center text-gray-700 font-medium bg-gray-100 p-2 rounded';
                     listItem.innerHTML = `
-                                <div class="flex-1">${item.itemName}</div>
-                                <div class="flex items-center space-x-2">
-                                    <span class="font-bold">${item.quantity}</span>
-                                    <span class="font-bold text-green-600">$${itemTotal.toFixed(2)}</span>
-                                </div>
-                            `;
+                                    <div class="flex-1">${item.itemName}</div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-bold">${item.quantity}</span>
+                                        <span class="font-bold text-green-600">$${itemTotal.toFixed(2)}</span>
+                                    </div>
+                                `;
                     cartList.appendChild(listItem);
                 });
             }
@@ -208,12 +208,21 @@
 
             saveOrderBtn.textContent = 'Saving...';
             saveOrderBtn.disabled = true;
+            const total = parseFloat(totalPriceElement.textContent.replace('$', ''));
+            const paid = parseFloat(moneyPaidInput.value);
 
-            const orderPayload = Object.values(cart).map(item => ({
-                ItemId: item.itemID,
-                Quantity: item.quantity,
-                UnitPrice: item.unitPrice
-            }));
+            const change = paid - total;
+            // The backend is expecting a JSON object with an 'Items' property.
+            const orderPayload = {
+                orderData: {
+                    OrderItems: Object.values(cart).map(item => ({
+                        ItemID: item.itemID
+                    })),
+                    AmountPaid: paid,
+                    AmountReturned: change
+                }
+
+            };
 
             try {
                 const response = await fetch(saveOrderUrl, {
@@ -238,6 +247,7 @@
                 saveOrderBtn.disabled = false;
             }
         }
+
 
 
         function updateViews() {
