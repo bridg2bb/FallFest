@@ -1,0 +1,368 @@
+﻿<!-- Loading Overlay -->
+<div id="loading-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-xl transition-opacity duration-300">
+    <div class="spinner"></div>
+    <div class="mt-4 text-gray-700 font-semibold">Loading menu...</div>
+</div>
+
+<div class="bg-white rounded-xl shadow-2xl p-2 pb-16 w-full max-w-lg border border-gray-200">
+    <div class="flex justify-center gap-2 mb-2">
+        <button id="show-menu-btn" class="flex-1 bg-blue-600 text-white font-semibold py-2 rounded-lg shadow transition transform">
+            Menu
+        </button>
+        <button id="show-cart-btn" class="flex-1 bg-gray-200 text-gray-800 font-semibold py-2 rounded-lg shadow transition transform">
+            Your Order (<span id="cart-item-count">0</span>)
+        </button>
+    </div>
+
+    <!-- Menu View -->
+    <section id="menu-section" class="p-2 bg-gray-50 rounded-lg shadow-inner">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Menu Items</h2>
+        <div id="items-container" class="grid grid-cols-2 gap-4 scrollable-content">
+            <!-- Menu items will be dynamically rendered here -->
+        </div>
+    </section>
+
+    <!-- Cart View -->
+    <aside id="cart-section" class="hidden p-2 bg-gray-50 rounded-lg shadow-inner flex flex-col justify-between h-[500px]">
+        <div class="flex-1 overflow-hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Your Order</h2>
+            <ul id="cart-list" class="space-y-2 mb-4 scrollable-content">
+                <!-- Cart items will be dynamically rendered here -->
+            </ul>
+        </div>
+
+        <div class="mt-auto pt-4 border-t-2 border-dashed border-gray-300">
+            <div class="flex justify-between items-center py-2">
+                <span class="text-xl font-bold text-gray-900">Total:</span>
+                <span id="total-price" class="text-2xl font-extrabold text-green-600">$0.00</span>
+            </div>
+
+            <div class="flex items-center mt-4">
+                <label for="money-paid" class="text-sm font-bold text-gray-900 mr-2">Paid:</label>
+                <input type="number" id="money-paid" step="0.01" class="flex-grow p-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-2 mt-2">
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="1"> $1 </button>
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="5"> $5 </button>
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="10"> $10 </button>
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="20"> $20 </button>
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="50"> $50 </button>
+                <button id="clear-paid-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105"> Clear </button>
+            </div>
+
+            <div id="status-message" class="mt-4 p-2 text-center rounded-lg font-semibold hidden"></div>
+
+            <button id="calculate-change-btn" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow-md transition transform hover:scale-105">
+                Calculate Change
+            </button>
+            <button id="save-order-btn" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg shadow-md transition transform hover:scale-105">
+                Save & Clear Order
+            </button>
+
+            <div id="change-display" class="mt-4 p-3 bg-yellow-100 rounded-lg shadow-inner hidden">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Change Due: <span id="change-amount" class="text-xl font-extrabold text-purple-700"></span></h3>
+                <div id="change-breakdown" class="grid grid-cols-2 gap-1 text-sm text-gray-700">
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- DOM Elements ---
+        const showMenuBtn = document.getElementById('show-menu-btn');
+        const showCartBtn = document.getElementById('show-cart-btn');
+        const menuSection = document.getElementById('menu-section');
+        const cartSection = document.getElementById('cart-section');
+        const itemsContainer = document.getElementById('items-container');
+        const cartList = document.getElementById('cart-list');
+        const totalPriceElement = document.getElementById('total-price');
+        const moneyPaidInput = document.getElementById('money-paid');
+        const calculateChangeBtn = document.getElementById('calculate-change-btn');
+        const saveOrderBtn = document.getElementById('save-order-btn');
+        const clearPaidBtn = document.getElementById('clear-paid-btn');
+        const cartItemCount = document.getElementById('cart-item-count');
+        const statusMessageDiv = document.getElementById('status-message');
+        const changeDisplay = document.getElementById('change-display');
+        const changeAmountElement = document.getElementById('change-amount');
+        const changeBreakdownElement = document.getElementById('change-breakdown');
+        const billButtons = document.querySelectorAll('.bill-btn');
+        const loadingOverlay = document.getElementById('loading-overlay');
+
+        // --- State Management ---
+        let menuItems = [];
+        let cart = {}; // Use an object for efficient lookups
+        let isOrderSaved = false;
+
+        // --- API URLS (Razor Syntax) ---
+        const getMenuItemsUrl = '@Url.Action("GetMenuItems", "Concessions")';
+        const saveOrderUrl = '@Url.Action("SaveOrder", "Concessions")';
+
+        // --- FUNCTIONS ---
+        async function getMenuItems() {
+            try {
+                const response = await fetch(getMenuItemsUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                menuItems = await response.json();
+                renderMenuItems();
+            } catch (error) {
+                console.error('Error fetching menu items:', error);
+                showStatusMessage('Error loading menu. Please try again later.', 'bg-red-200 text-red-800');
+            } finally {
+                // Hide the loading overlay whether the fetch was successful or not
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+
+        function renderMenuItems() {
+            itemsContainer.innerHTML = '';
+            menuItems.forEach(item => {
+                // Use the item's numerical ID to check the cart
+                const count = cart[item.itemID] ? cart[item.itemID].quantity : 0;
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'bg-white rounded-lg p-3 shadow-md flex flex-col justify-between items-center text-center transition-transform hover:scale-105 hover:shadow-lg cursor-pointer';
+
+                itemDiv.innerHTML = `
+                            <h3 class="text-md font-bold text-gray-800">${item.itemName} (${count})</h3>
+                            <p class="text-lg font-semibold text-gray-600 mt-1">$${item.unitPrice.toFixed(2)}</p>
+                            <div class="flex gap-2 mt-2 w-full">
+                                <button class="add-item-btn flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105" data-item-id="${item.itemID}">
+                                    &plus;
+                                </button>
+                                    <button class="remove-item-btn flex-1 bg-red-500 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" data-item-id="${item.itemID}" ${count === 0 ? 'disabled' : ''}>
+                                    &minus;
+                                </button>
+                            </div>
+                        `;
+                itemsContainer.appendChild(itemDiv);
+            });
+        }
+
+        function renderCartItems() {
+            cartList.innerHTML = '';
+            let total = 0;
+            let itemCount = 0;
+            const cartItems = Object.values(cart);
+
+            if (cartItems.length === 0) {
+                cartList.innerHTML = '<li class="text-center text-gray-500 italic">Your order is empty.</li>';
+            } else {
+                cartItems.forEach(item => {
+                    const itemTotal = item.unitPrice * item.quantity;
+                    total += itemTotal;
+                    itemCount += item.quantity;
+                    const listItem = document.createElement('li');
+                    listItem.className = 'flex justify-between items-center text-gray-700 font-medium bg-gray-100 p-2 rounded';
+                    listItem.innerHTML = `
+                                <div class="flex-1">${item.itemName}</div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-bold">${item.quantity}</span>
+                                    <span class="font-bold text-green-600">$${itemTotal.toFixed(2)}</span>
+                                </div>
+                            `;
+                    cartList.appendChild(listItem);
+                });
+            }
+
+            totalPriceElement.textContent = `$${total.toFixed(2)}`;
+            cartItemCount.textContent = itemCount;
+        }
+
+
+        function addItemToCart(itemId) {
+            // Parse the string itemId to an integer for a strict comparison
+            const numericalId = parseInt(itemId, 10);
+            const item = menuItems.find(i => i.itemID === numericalId);
+            if (item) {
+                // Use the numerical ID as the key for the cart object
+                if (cart[numericalId]) {
+                    cart[numericalId].quantity++;
+                } else {
+                    cart[numericalId] = { ...item, quantity: 1 };
+                }
+            }
+            updateViews();
+        }
+
+        function removeItemFromCart(itemId) {
+            // Parse the string itemId to an integer for a strict comparison
+            const numericalId = parseInt(itemId, 10);
+            if (cart[numericalId] && cart[numericalId].quantity > 1) {
+                cart[numericalId].quantity--;
+            } else {
+                delete cart[numericalId];
+            }
+            updateViews();
+        }
+
+        async function saveOrderAndClearCart() {
+            if (Object.keys(cart).length === 0) {
+                showStatusMessage('Cannot save an empty order.', 'bg-red-200 text-red-800');
+                return;
+            }
+
+            saveOrderBtn.textContent = 'Saving...';
+            saveOrderBtn.disabled = true;
+
+            const orderPayload = Object.values(cart).map(item => ({
+                ItemId: item.itemID,
+                Quantity: item.quantity,
+                UnitPrice: item.unitPrice
+            }));
+
+            try {
+                const response = await fetch(saveOrderUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderPayload),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save order.');
+                }
+
+                showStatusMessage('Order saved successfully!', 'bg-green-200 text-green-800');
+                clearCart();
+            } catch (error) {
+                console.error('Error saving order:', error);
+                showStatusMessage('Error saving order. Please try again.', 'bg-red-200 text-red-800');
+            } finally {
+                saveOrderBtn.textContent = 'Save & Clear Order';
+                saveOrderBtn.disabled = false;
+            }
+        }
+
+
+        function updateViews() {
+            renderMenuItems();
+            renderCartItems();
+        }
+
+        function calculateChange() {
+            hideStatusMessage();
+            const total = parseFloat(totalPriceElement.textContent.replace('$', ''));
+            const paid = parseFloat(moneyPaidInput.value);
+
+            if (isNaN(paid) || paid < total) {
+                showStatusMessage('Amount paid is less than the total!', 'bg-red-200 text-red-800');
+                changeDisplay.classList.add('hidden');
+                return;
+            }
+
+            const change = paid - total;
+            changeAmountElement.textContent = `$${change.toFixed(2)}`;
+            renderChangeBreakdown(getChangeBreakdown(change));
+            changeDisplay.classList.remove('hidden');
+        }
+
+        function getChangeBreakdown(amount) {
+            let remaining = amount;
+            const breakdown = {};
+            const denominations = [
+                { name: '$20 Bill', value: 20 }, { name: '$10 Bill', value: 10 },
+                { name: '$5 Bill', value: 5 }, { name: '$1 Bill', value: 1 },
+                { name: 'Quarter', value: 0.25 }, { name: 'Dime', value: 0.10 },
+                { name: 'Nickel', value: 0.05 }, { name: 'Penny', value: 0.01 }
+            ];
+            denominations.forEach(d => {
+                if (remaining >= d.value) {
+                    const count = Math.floor(remaining / d.value);
+                    breakdown[d.name] = count;
+                    remaining = parseFloat((remaining % d.value).toFixed(2));
+                }
+            });
+            return breakdown;
+        }
+
+        function renderChangeBreakdown(breakdown) {
+            changeBreakdownElement.innerHTML = '';
+            for (const [name, count] of Object.entries(breakdown)) {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center';
+                div.innerHTML = `<span>${name}</span><span class="font-bold">${count}</span>`;
+                changeBreakdownElement.appendChild(div);
+            }
+        }
+
+        function clearCart() {
+            cart = {};
+            moneyPaidInput.value = '';
+            changeDisplay.classList.add('hidden');
+            hideStatusMessage();
+            updateViews();
+            switchView('menu');
+        }
+
+        function switchView(view) {
+            if (view === 'menu') {
+                menuSection.classList.remove('hidden');
+                cartSection.classList.add('hidden');
+                showMenuBtn.classList.remove('bg-gray-200', 'text-gray-800');
+                showMenuBtn.classList.add('bg-blue-600', 'text-white');
+                showCartBtn.classList.add('bg-gray-200', 'text-gray-800');
+                showCartBtn.classList.remove('bg-blue-600', 'text-white');
+            } else {
+                menuSection.classList.add('hidden');
+                cartSection.classList.remove('hidden');
+                showCartBtn.classList.remove('bg-gray-200', 'text-gray-800');
+                showCartBtn.classList.add('bg-blue-600', 'text-white');
+                showMenuBtn.classList.add('bg-gray-200', 'text-gray-800');
+                showMenuBtn.classList.remove('bg-blue-600', 'text-white');
+            }
+        }
+
+        function showStatusMessage(message, className) {
+            statusMessageDiv.textContent = message;
+            statusMessageDiv.className = `mt-4 p-2 text-center rounded-lg font-semibold ${className}`;
+            statusMessageDiv.classList.remove('hidden');
+        }
+
+        function hideStatusMessage() {
+            statusMessageDiv.classList.add('hidden');
+        }
+
+        // --- EVENT LISTENERS (Using Delegation for Efficiency) ---
+        itemsContainer.addEventListener('click', (event) => {
+            const button = event.target.closest('button');
+            if (!button) return;
+            const itemId = button.dataset.itemId;
+            if (button.classList.contains('add-item-btn')) {
+                addItemToCart(itemId);
+            } else if (button.classList.contains('remove-item-btn') && !button.disabled) {
+                removeItemFromCart(itemId);
+            }
+        });
+
+        showMenuBtn.addEventListener('click', () => switchView('menu'));
+        showCartBtn.addEventListener('click', () => {
+            renderCartItems();
+            switchView('cart');
+        });
+        calculateChangeBtn.addEventListener('click', calculateChange);
+        saveOrderBtn.addEventListener('click', saveOrderAndClearCart);
+        clearPaidBtn.addEventListener('click', () => {
+            moneyPaidInput.value = '';
+            changeDisplay.classList.add('hidden');
+            hideStatusMessage();
+        });
+        billButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const value = parseFloat(button.dataset.value);
+                const currentValue = parseFloat(moneyPaidInput.value) || 0;
+                moneyPaidInput.value = (currentValue + value).toFixed(2);
+            });
+        });
+
+        // --- INITIALIZATION ---
+        getMenuItems();
+        updateViews();
+        switchView('menu');
+    });
+</script>

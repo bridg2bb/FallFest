@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FallFest", "FallFest\FallFest.csproj", "{5B7A6143-F4F2-413A-BFCB-513175F6A8EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B7A6143-F4F2-413A-BFCB-513175F6A8EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B7A6143-F4F2-413A-BFCB-513175F6A8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B7A6143-F4F2-413A-BFCB-513175F6A8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B7A6143-F4F2-413A-BFCB-513175F6A8EA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5738D76B-81F9-4541-A146-E31AD6C1E36B}
+	EndGlobalSection
+EndGlobal

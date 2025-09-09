@@ -1,0 +1,22 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace FallFest.Models
+{
+    public class Item
+    {
+        [Key]
+        [Column("ItemID")]
+        public int ItemID { get; set; }
+
+        [Column("ItemName")]
+        public string ItemName { get; set; }
+
+        [Column("UnitPrice")]
+        public decimal UnitPrice { get; set; }
+
+        [Required]
+        public int OrderTypeId { get; set; }
+
+    }
+}
