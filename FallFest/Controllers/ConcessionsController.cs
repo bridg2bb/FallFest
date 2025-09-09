@@ -34,7 +34,6 @@ namespace FallFest.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken] // Optional but good practice for security
         public async Task<IActionResult> SaveOrder([FromBody] OrderRequestViewModel orderData)
         {
             if (orderData == null || orderData.OrderItems == null || orderData.OrderItems.Count == 0)
