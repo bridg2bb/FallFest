@@ -17,6 +17,13 @@ namespace FallFest.Models
         public ICollection<OrderItem> OrderItems { get; set; }
     }
 
+    public class OrderStats
+    {
+        public int TotalOrders { get; set; }
+        public double TotalAmount { get; set; }
+        public Guid OrderId { get; set; }
+    }
+
     // ViewModel to handle incoming data from the client-side JavaScript
     public class OrderRequestViewModel
     {

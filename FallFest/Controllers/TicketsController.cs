@@ -10,15 +10,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FallFest.Controllers
 {
-    public class ConcessionsController : Controller
+    public class TicketsController : Controller
     {
-        private readonly ILogger<ConcessionsController> _logger;
+        private readonly ILogger<TicketsController> _logger;
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
 
         // Constructor with Dependency Injection
-        public ConcessionsController(
-            ILogger<ConcessionsController> logger,
+        public TicketsController(
+            ILogger<TicketsController> logger,
             ApplicationDbContext context,
             IConfiguration configuration)
         {
@@ -48,7 +48,7 @@ namespace FallFest.Controllers
                 {
                     AmountPaid = orderData.AmountPaid,
                     AmountReturned = orderData.AmountReturned,
-                    OrderType = _context.OrderTypes.Single(x => x.OrderTypeID == 1),
+                    OrderType = _context.OrderTypes.Single(x => x.OrderTypeID == 2),
                     TransactionDateTime = DateTime.Now, 
                     OrderID = Guid.NewGuid()
                 };
@@ -74,7 +74,7 @@ namespace FallFest.Controllers
                     _context.OrderItems.Add(orderItem);
                 }
 
-                 await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Order saved successfully with ID: {OrderId}", newOrder.OrderID);
                 return Ok(new { success = true, message = "Order saved successfully." });
@@ -89,14 +89,11 @@ namespace FallFest.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMenuItems()
         {
-           
-            // Only retrieve items with OrderTypeId = 1
+          
             var menuItems = await _context.Items
-                                .Where(item => item.OrderTypeId == 1 && item.Enabled)
+                                .Where(item => item.OrderTypeId == 2 && item.Enabled)
                                 .ToListAsync();
             return Json(menuItems);
         }
-
-
     }
 }

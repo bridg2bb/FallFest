@@ -58,16 +58,16 @@
 
 
             <div id="change-display" class="mt-4 p-3 bg-yellow-100 rounded-lg shadow-inner hidden">
-               <h4 class="text-lg font-bold text-gray-800 mb-2">
-                   <span id="amount-paid" class="text-m font-bold text-gray-800"></span>
-                   <span class="text-m font-bold text-gray-800">&nbsp;-&nbsp;</span>
-                   <span id="total-cost" class="text-m font-bold text-gray-800"></span>
-                   <span class="text-m font-bold text-gray-800">&nbsp;=&nbsp;</span>
+                <h4 class="text-lg font-bold text-gray-800 mb-2">
+                    <span id="amount-paid" class="text-m font-bold text-gray-800"></span>
+                    <span class="text-m font-bold text-gray-800">&nbsp;-&nbsp;</span>
+                    <span id="total-cost" class="text-m font-bold text-gray-800"></span>
+                    <span class="text-m font-bold text-gray-800">&nbsp;=&nbsp;</span>
                 </h4>
-                
+
                 <h3 class="text-lg font-bold text-gray-800 mb-2">
-                   Change Due: <span id="change-amount" class="text-xl font-extrabold text-purple-700"></span>
-               </h3>
+                    Change Due: <span id="change-amount" class="text-xl font-extrabold text-purple-700"></span>
+                </h3>
                 <div id="change-breakdown" class="grid grid-cols-2 gap-1 text-sm text-gray-700">
                 </div>
             </div>
@@ -109,8 +109,8 @@
         let isOrderSaved = false;
 
         // --- API URLS (Razor Syntax) ---
-        const getMenuItemsUrl = '@Url.Action("GetMenuItems", "Concessions")';
-        const saveOrderUrl = '@Url.Action("SaveOrder", "Concessions")';
+        const getMenuItemsUrl = '@Url.Action("GetMenuItems", "Tickets")';
+        const saveOrderUrl = '@Url.Action("SaveOrder", "Tickets")';
 
         // --- FUNCTIONS ---
         async function getMenuItems() {
@@ -139,17 +139,17 @@
                 itemDiv.className = 'bg-white rounded-lg p-3 shadow-md flex flex-col justify-between items-center text-center transition-transform hover:scale-105 hover:shadow-lg cursor-pointer';
 
                 itemDiv.innerHTML = `
-                                        <h3 class="text-md font-bold text-gray-800">${item.itemName} (${count})</h3>
-                                        <p class="text-lg font-semibold text-gray-600 mt-1">$${item.unitPrice.toFixed(2)}</p>
-                                        <div class="flex gap-2 mt-2 w-full">
-                                            <button class="add-item-btn flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105" data-item-id="${item.itemID}">
-                                                &plus;
-                                            </button>
-                                            <button class="remove-item-btn flex-1 bg-red-500 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" data-item-id="${item.itemID}" ${count === 0 ? 'disabled' : ''}>
-                                                &minus;
-                                            </button>
-                                        </div>
-                                    `;
+                                    <h3 class="text-md font-bold text-gray-800">${item.itemName} (${count})</h3>
+                                    <p class="text-lg font-semibold text-gray-600 mt-1">$${item.unitPrice.toFixed(2)}</p>
+                                    <div class="flex gap-2 mt-2 w-full">
+                                        <button class="add-item-btn flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105" data-item-id="${item.itemID}">
+                                            &plus;
+                                        </button>
+                                        <button class="remove-item-btn flex-1 bg-red-500 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" data-item-id="${item.itemID}" ${count === 0 ? 'disabled' : ''}>
+                                            &minus;
+                                        </button>
+                                    </div>
+                                `;
                 itemsContainer.appendChild(itemDiv);
             });
         }
@@ -170,12 +170,12 @@
                     const listItem = document.createElement('li');
                     listItem.className = 'flex justify-between items-center text-gray-700 font-medium bg-gray-100 p-2 rounded';
                     listItem.innerHTML = `
-                                            <div class="flex-1">${item.itemName}</div>
-                                            <div class="flex items-center space-x-2">
-                                                <span class="font-bold">${item.quantity}</span>
-                                                <span class="font-bold text-green-600">$${itemTotal.toFixed(2)}</span>
-                                            </div>
-                                        `;
+                                        <div class="flex-1">${item.itemName}</div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold">${item.quantity}</span>
+                                            <span class="font-bold text-green-600">$${itemTotal.toFixed(2)}</span>
+                                        </div>
+                                    `;
                     cartList.appendChild(listItem);
                 });
             }
@@ -256,8 +256,8 @@
                     throw new Error('Failed to save order.');
                 }
 
-                showStatusMessage('Order ' + response.orderId + ' saved successfully!', 'bg-green-200 text-green-800');
-                isOrderSaved = true;
+                showStatusMessage('Order saved successfully!', 'bg-green-200 text-green-800');
+                isOrderSaved = true; 
                 calculateChange(total, paid);
             } catch (error) {
                 console.error('Error saving order:', error);
@@ -281,7 +281,7 @@
 
         function calculateChange(total, paid) {
             hideStatusMessage();
-            const change = paid - total;
+            const change = paid - total; 
             amountPaidElement.textContent = `$${paid.toFixed(2)}`;
             totalCostElement.textContent = `$${total.toFixed(2)}`;
             changeAmountElement.textContent = `$${change.toFixed(2)}`;
@@ -320,7 +320,7 @@
 
         function clearCart() {
             cart = {};
-            isOrderSaved = false;
+            isOrderSaved = false; 
             moneyPaidInput.value = '';
             changeDisplay.classList.add('hidden');
             hideStatusMessage();
@@ -331,8 +331,7 @@
         function switchView(view) {
             if (view === 'menu') {
                 // This is the correct place to clear the cart based on the new logic
-                if (isOrderSaved)
-                {
+                if (isOrderSaved) {
                     clearCart();
                 }
                 menuSection.classList.remove('hidden');

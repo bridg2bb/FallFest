@@ -18,5 +18,6 @@ namespace FallFest.Models
         [Required]
         public int OrderTypeId { get; set; }
 
+        public bool Enabled { get; set; }
     }
 }
