@@ -185,12 +185,27 @@
         }
 
         function addItemToCart(itemID) {
-            const item = menuItems.find(i => i.itemID === itemID);
+            const targetItemID = parseInt(itemID);
+            let item = null;
+
+            for (const itemType of menuItems) {
+                item = itemType.items.find(i => i.itemID === targetItemID);
+
+                if (item) {
+                    break;
+                }
+            }
+
             if (item) {
                 if (cart[itemID]) {
                     cart[itemID].quantity++;
                 } else {
-                    cart[itemID] = { ...item, quantity: 1 };
+                    cart[itemID] = {
+                        itemID: item.itemID,
+                        itemName: item.itemName,
+                        unitPrice: item.unitPrice,
+                        quantity: 1
+                    };
                 }
             }
             updateViews();

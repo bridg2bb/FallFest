@@ -4,94 +4,193 @@
     <div class="mt-4 text-gray-700 font-semibold">Loading menu...</div>
 </div>
 
-<div class="bg-white rounded-xl shadow-2xl p-2 pb-16 w-full max-w-lg border border-gray-200">
-    <div class="flex justify-center gap-2 mb-2">
-        <button id="show-menu-btn" class="flex-1 bg-blue-600 text-white font-semibold py-2 rounded-lg shadow transition transform">
+<div class="flex flex-col h-dvh w-full mx-auto max-w-5xl shadow-2xl bg-white border border-gray-100">
+    <header class="flex-shrink-0 h-[50px] flex items-center justify-between px-4 shadow-md">
+
+        <button id="show-menu-btn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow">
             Menu
         </button>
-        <button id="show-cart-btn" class="flex-1 bg-gray-200 text-gray-800 font-semibold py-2 rounded-lg shadow transition transform">
-            Your Order (<span id="cart-item-count">0</span>)
+        <button id="show-cart-btn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow">
+            Order (<span id="cart-item-count">0</span>)
         </button>
-    </div>
+    </header>
 
     <!-- Menu View -->
-    <section id="menu-section" class="p-2 bg-gray-50 rounded-lg shadow-inner">
-        <div id="items-container" class="grid grid-cols-2 gap-4 scrollable-content">
-            <!-- Menu items will be dynamically rendered here -->
+    <main id="menu-section" class="flex-grow overflow-y-auto">
+        <div class="space-y-4 pt-4">
+            <div id="items-container" class="grid grid-cols-3 gap-4">
+                <!-- Menu items will be dynamically rendered here -->
+            </div>
         </div>
-    </section>
+    </main>
 
-    <!-- Cart View -->
-    <aside id="cart-section" class="hidden p-2 bg-gray-50 rounded-lg shadow-inner flex flex-col justify-between h-[500px]">
-        <div class="flex-1 overflow-hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Your Order</h2>
-            <ul id="cart-list" class="space-y-2 mb-4 scrollable-content">
-                <!-- Cart items will be dynamically rendered here -->
-            </ul>
+    <!-- Previous View -->
+    <main id="previous-section" class="flex-grow overflow-y-auto">
+
+        <!-- Loading Panel for Orders -->
+        <div id="ordersLoadingPanel" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 hidden">
+            <div class="flex flex-col items-center">
+                <i class="fas fa-spinner fa-spin text-blue-600 text-3xl"></i>
+                <span class="mt-2 text-blue-600 font-medium">Loading orders...</span>
+            </div>
         </div>
 
-        <div class="mt-auto pt-4 border-t-2 border-dashed border-gray-300">
-            <div class="flex justify-between items-center py-2">
-                <span class="text-xl font-bold text-gray-900">Total:</span>
-                <span id="total-price" class="text-2xl font-extrabold text-green-600">$0.00</span>
-            </div>
-
-            <div class="flex items-center mt-4">
-                <label for="money-paid" class="text-sm font-bold text-gray-900 mr-2">Paid:</label>
-                <input type="number" id="money-paid" step="0.01" class="flex-grow p-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div class="flex flex-wrap justify-center gap-2 mt-2">
-                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="1"> $1 </button>
-                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="5"> $5 </button>
-                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="10"> $10 </button>
-                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="20"> $20 </button>
-                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="50"> $50 </button>
-                <button id="clear-paid-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105"> Clear </button>
-            </div>
-
-            <div id="status-message" class="mt-4 p-2 text-center rounded-lg font-semibold hidden"></div>
-
-            <button id="save-and-calculate-btn" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow-md transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                Save Order & Calculate Change
-            </button>
-
-
-            <div id="change-display" class="mt-4 p-3 bg-yellow-100 rounded-lg shadow-inner hidden">
-               <h4 class="text-lg font-bold text-gray-800 mb-2">
-                   <span id="amount-paid" class="text-m font-bold text-gray-800"></span>
-                   <span class="text-m font-bold text-gray-800">&nbsp;-&nbsp;</span>
-                   <span id="total-cost" class="text-m font-bold text-gray-800"></span>
-                   <span class="text-m font-bold text-gray-800">&nbsp;=&nbsp;</span>
-                </h4>
-                
-                <h3 class="text-lg font-bold text-gray-800 mb-2">
-                   Change Due: <span id="change-amount" class="text-xl font-extrabold text-purple-700"></span>
-               </h3>
-                <div id="change-breakdown" class="grid grid-cols-2 gap-1 text-sm text-gray-700">
+        <!-- Filter and Sort Controls -->
+        <div class="flex flex-col md:flex-row items-center justify-between mb-6 space-y-4 md:space-y-0 md:space-x-4">
+            <!-- Search Bar -->
+            <div class="w-full md:w-auto flex-grow">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search orders..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 </div>
             </div>
+
+            <!-- Sort Dropdown -->
+            <div class="w-full md:w-auto">
+                <select id="sortSelect" class="w-full py-2 px-4 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                    <option value="TransactionDateTimeDesc">Date (Newest First)</option>
+                    <option value="TransactionDateTimeAsc">Date (Oldest First)</option>
+                    <option value="AmountPaidDesc">Amount Paid (High to Low)</option>
+                    <option value="AmountPaidAsc">Amount Paid (Low to High)</option>
+                </select>
+            </div>
         </div>
-    </aside>
+        <div class="table-container">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Date/Time
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Amount Paid
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Card or Cash
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Table rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals Summary -->
+        <div class="flex flex-col md:flex-row justify-end mt-6 space-y-4 md:space-y-0 md:space-x-8 text-lg font-bold">
+            <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
+                Total Orders: <span id="totalOrders" class="text-blue-600">0</span>
+            </div>
+            <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
+                Total Amount Paid: <span id="totalAmountPaid" class="text-blue-600">$0.00</span>
+            </div>
+        </div>
+
+        <!-- No Orders Message -->
+        <div id="noOrdersMessage" class="hidden text-center text-gray-500 mt-6 p-4 border border-dashed border-gray-300 rounded-lg">
+            No orders found matching the current criteria.
+        </div>
+    </main>
+
+<!-- Cart View -->
+<aside id="cart-section" class="flex-grow overflow-y-auto">
+    <div class="flex-1 overflow-hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Your Order</h2>
+        <ul id="cart-list" class="space-y-2 mb-4 scrollable-content">
+            <!-- Cart items will be dynamically rendered here -->
+        </ul>
+    </div>
+
+    <div class="mt-auto pt-4 border-t-2 border-dashed border-gray-300">
+        <div class="flex justify-between items-center py-2">
+            <span class="text-xl font-bold text-gray-900">Total:</span>
+            <span id="total-price" class="text-2xl font-extrabold text-green-600">$0.00</span>
+        </div>
+
+        <div class="flex items-center mt-4">
+            <label for="money-paid" class="text-sm font-bold text-gray-900 mr-2">Cash Paid:</label>
+            <input type="number" id="money-paid" step="0.01" class="flex-grow p-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-2 mt-2">
+            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="1"> $1 </button>
+            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="5"> $5 </button>
+            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="10"> $10 </button>
+            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="20"> $20 </button>
+            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="50"> $50 </button>
+            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value=".25"> $0.25 </button>
+            <button id="clear-paid-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105"> Clear </button>
+        </div>
+
+        <div id="status-message" class="mt-4 p-2 text-center rounded-lg font-semibold hidden"></div>
+
+
+        <button id="save-and-calculate-btn" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow-md transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            Cash
+        </button>
+
+        <button id="save-and-card-btn" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow-md transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            Card
+        </button>
+
+        <div id="change-display" class="mt-4 p-3 bg-yellow-100 rounded-lg shadow-inner hidden">
+            <h4 class="text-lg font-bold text-gray-800 mb-2">
+                <span id="amount-paid" class="text-m font-bold text-gray-800"></span>
+                <span class="text-m font-bold text-gray-800">&nbsp;-&nbsp;</span>
+                <span id="total-cost" class="text-m font-bold text-gray-800"></span>
+                <span class="text-m font-bold text-gray-800">&nbsp;=&nbsp;</span>
+            </h4>
+
+            <h3 class="text-lg font-bold text-gray-800 mb-2">
+                Change Due: <span id="change-amount" class="text-xl font-extrabold text-purple-700"></span>
+            </h3>
+            <div id="change-breakdown" class="grid grid-cols-2 gap-1 text-sm text-gray-700">
+            </div>
+        </div>
+    </div>
+</aside>
+<footer class="flex-shrink-0 h-[50px] flex items-center justify-between px-4 shadow-md">
+    <button id="clear-order-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded-lg shadow">
+        Clear (without saving)
+    </button>
+
+    <button id="show-previous-btn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow">
+        Previous
+    </button>
+</footer>
 </div>
-
-<button id="clear-order-btn" class="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition transform hover:scale-105">
-    Clear Order (without saving)
-</button>
-
+<div id="orderDetailsModal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto transform transition-all scale-95 opacity-0 duration-300 ease-out" id="modalContent">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900">Order Details</h2>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <i class="fas fa-times fa-lg"></i>
+                </button>
+            </div>
+            <div id="modalBody" class="space-y-4">
+                <!-- Details will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+
         // --- DOM Elements ---
         const showMenuBtn = document.getElementById('show-menu-btn');
         const showCartBtn = document.getElementById('show-cart-btn');
+        const showPreviousBtn = document.getElementById('show-previous-btn');
         const menuSection = document.getElementById('menu-section');
         const cartSection = document.getElementById('cart-section');
+        const previousSection = document.getElementById('previous-section');
         const itemsContainer = document.getElementById('items-container');
         const cartList = document.getElementById('cart-list');
         const totalPriceElement = document.getElementById('total-price');
         const moneyPaidInput = document.getElementById('money-paid');
         const clearPaidBtn = document.getElementById('clear-paid-btn');
         const saveAndCalculateBtn = document.getElementById('save-and-calculate-btn');
+        const saveAndCardBtn = document.getElementById('save-and-card-btn');
         const clearOrderBtn = document.getElementById('clear-order-btn');
         const cartItemCount = document.getElementById('cart-item-count');
         const statusMessageDiv = document.getElementById('status-message');
@@ -102,15 +201,34 @@
         const totalCostElement = document.getElementById('total-cost');
         const billButtons = document.querySelectorAll('.bill-btn');
         const loadingOverlay = document.getElementById('loading-overlay');
+        const ordersTableBody = document.getElementById('ordersTableBody');
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        const noOrdersMessage = document.getElementById('noOrdersMessage');
+        const orderDetailsModal = document.getElementById('orderDetailsModal');
+        const modalContent = document.getElementById('modalContent');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalBody = document.getElementById('modalBody');
+        const totalOrdersSpan = document.getElementById('totalOrders');
+        const totalAmountPaidSpan = document.getElementById('totalAmountPaid');
+        const totalQuantitySoldSpan = document.getElementById('totalQuantitySold');
+        const totalRevenueSpan = document.getElementById('totalRevenue');
+        const ordersLoadingPanel = document.getElementById('ordersLoadingPanel');
+
 
         // --- State Management ---
         let menuItems = [];
         let cart = {}; // Use an object for efficient lookups
-        let isOrderSaved = false;
+        let isOrderSaved = false; 
+        let allOrders = [];
 
         // --- API URLS (Razor Syntax) ---
         const getMenuItemsUrl = '@Url.Action("GetMenuItems", "Concessions")';
         const saveOrderUrl = '@Url.Action("SaveOrder", "Concessions")';
+        const getOrdersUrl = '@Url.Action("GetOrders", "Concessions")';
+
+
+
 
         // --- FUNCTIONS ---
         async function getMenuItems() {
@@ -131,26 +249,54 @@
         }
 
         function renderMenuItems() {
+            // 1. Clear the main container
             itemsContainer.innerHTML = '';
-            menuItems.forEach(item => {
-                // Use the item's numerical ID to check the cart
-                const count = cart[item.itemID] ? cart[item.itemID].quantity : 0;
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'bg-white rounded-lg p-3 shadow-md flex flex-col justify-between items-center text-center transition-transform hover:scale-105 hover:shadow-lg cursor-pointer';
 
-                itemDiv.innerHTML = `
-                                        <h3 class="text-md font-bold text-gray-800">${item.itemName} (${count})</h3>
-                                        <p class="text-lg font-semibold text-gray-600 mt-1">$${item.unitPrice.toFixed(2)}</p>
-                                        <div class="flex gap-2 mt-2 w-full">
-                                            <button class="add-item-btn flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105" data-item-id="${item.itemID}">
-                                                &plus;
-                                            </button>
-                                            <button class="remove-item-btn flex-1 bg-red-500 text-white font-semibold py-1 px-3 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" data-item-id="${item.itemID}" ${count === 0 ? 'disabled' : ''}>
-                                                &minus;
-                                            </button>
-                                        </div>
-                                    `;
-                itemsContainer.appendChild(itemDiv);
+            // Check if menuItems is an array (of ItemType objects) and has content
+            if (!Array.isArray(menuItems) || menuItems.length === 0) {
+                itemsContainer.innerHTML = '<p class="text-center text-gray-500">No menu items available.</p>';
+                return;
+            }
+
+            // 2. Loop through each ItemType (the groups)
+            menuItems.forEach(itemType => {
+                // Only render the group if it contains items
+                if (!itemType.items || itemType.items.length === 0) {
+                    return;
+                }
+
+                // --- Create Group Header ---
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'w-full col-span-3'; // Full width, margin for spacing
+                headerDiv.innerHTML = `<h2 class="text-md font-extrabold text-gray-700 border-b-2 border-indigo-400 pb-1">${itemType.itemTypeName}</h2>`;
+                itemsContainer.appendChild(headerDiv);
+
+
+                const groupContainer = document.createElement('div');
+
+                itemType.items.forEach(item => {
+                    const count = cart[item.itemID] ? cart[item.itemID].quantity : 0;
+                    const itemDiv = document.createElement('div');
+
+                    itemDiv.className = 'bg-white rounded-lg p-3 shadow-md flex flex-col justify-between items-center text-center transition-transform hover:scale-105 hover:shadow-lg cursor-pointer';
+
+                    itemDiv.innerHTML = `
+                                <h3 class="text-xs font-bold text-gray-800">${item.itemName} (${count})</h3>
+                                <p class="text-xs font-semibold text-gray-600 mt-1">$${item.unitPrice.toFixed(2)}</p>
+                                <div class="flex gap-1 mt-1 w-full">
+                                    <button class="add-item-btn flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-1 rounded-lg shadow transition transform hover:scale-105" data-item-id="${item.itemID}">
+                                        &plus;
+                                    </button>
+                                    <button class="remove-item-btn flex-1 bg-red-500 text-white font-semibold py-1 px-1 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" data-item-id="${item.itemID}" ${count === 0 ? 'disabled' : ''}>
+                                        &minus;
+                                    </button>
+                                </div>
+                            `;
+
+                    itemsContainer.appendChild(itemDiv);
+                });
+
+
             });
         }
 
@@ -170,12 +316,12 @@
                     const listItem = document.createElement('li');
                     listItem.className = 'flex justify-between items-center text-gray-700 font-medium bg-gray-100 p-2 rounded';
                     listItem.innerHTML = `
-                                            <div class="flex-1">${item.itemName}</div>
-                                            <div class="flex items-center space-x-2">
-                                                <span class="font-bold">${item.quantity}</span>
-                                                <span class="font-bold text-green-600">$${itemTotal.toFixed(2)}</span>
-                                            </div>
-                                        `;
+                                                        <div class="flex-1">${item.itemName}</div>
+                                                        <div class="flex items-center space-x-2">
+                                                            <span class="font-bold">${item.quantity}</span>
+                                                            <span class="font-bold text-green-600">$${itemTotal.toFixed(2)}</span>
+                                                        </div>
+                                                    `;
                     cartList.appendChild(listItem);
                 });
             }
@@ -185,7 +331,14 @@
         }
 
         function addItemToCart(itemID) {
-            const item = menuItems.find(i => i.itemID === itemID);
+            const targetItemID = parseInt(itemID);
+            let item = null;
+            for (const itemType of menuItems) {
+                item = itemType.items.find(i => i.itemID === targetItemID);
+                if (item) {
+                    break;
+                }
+            }
             if (item) {
                 if (cart[itemID]) {
                     cart[itemID].quantity++;
@@ -205,6 +358,63 @@
             updateViews();
         }
 
+        async function saveOrderAndCard() {
+            if (Object.keys(cart).length === 0) {
+                showStatusMessage('Cannot save an empty order.', 'bg-red-200 text-red-800');
+                return;
+            }
+
+            if (isOrderSaved) {
+                showStatusMessage('Order already saved. Please clear the order to start a new one.', 'bg-yellow-200 text-yellow-800');
+                return;
+            }
+
+
+            saveAndCalculateBtn.disabled = true;
+            saveAndCardBtn.textContent = 'Saving...';
+            saveAndCardBtn.disabled = true;
+
+            const total = parseFloat(totalPriceElement.textContent.replace('$', ''));
+            const paid = total;
+
+
+            const orderPayload = {
+                orderItems: Object.values(cart).map(item => ({
+                    name: item.itemName,
+                    quantity: item.quantity,
+                    price: item.unitPrice
+                })),
+                amountPaid: paid,
+                amountReturned: 0,
+                isCard: true
+            };
+
+            try {
+                const response = await fetch(saveOrderUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderPayload),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save order.');
+                }
+
+                showStatusMessage('Order charged to card. Total: $' + paid, 'bg-green-200 text-green-800');
+                isOrderSaved = true;
+            } catch (error) {
+                console.error('Error saving order:', error);
+                showStatusMessage('Error saving order. Please try again.', 'bg-red-200 text-red-800');
+            } finally {
+                saveAndCardBtn.textContent = 'Card';
+                saveAndCardBtn.disabled = false;
+                saveAndCalculateBtn.disabled = false;
+                fetchAndRenderOrders();
+            }
+        }
+
         async function saveOrderAndCalculateChange() {
             if (Object.keys(cart).length === 0) {
                 showStatusMessage('Cannot save an empty order.', 'bg-red-200 text-red-800');
@@ -219,14 +429,16 @@
 
             saveAndCalculateBtn.textContent = 'Saving...';
             saveAndCalculateBtn.disabled = true;
+            saveAndCardBtn.disabled = true;
 
             const total = parseFloat(totalPriceElement.textContent.replace('$', ''));
             const paid = parseFloat(moneyPaidInput.value);
 
             if (isNaN(paid) || paid < total) {
                 showStatusMessage('Amount paid is less than the total!', 'bg-red-200 text-red-800');
-                saveAndCalculateBtn.textContent = 'Save Order & Calculate Change';
+                saveAndCalculateBtn.textContent = 'Cash';
                 saveAndCalculateBtn.disabled = false;
+                saveAndCardBtn.disabled = false;
                 changeDisplay.classList.add('hidden');
                 return;
             }
@@ -240,7 +452,8 @@
                     price: item.unitPrice
                 })),
                 amountPaid: paid,
-                amountReturned: returned
+                amountReturned: returned,
+                isCard: false
             };
 
             try {
@@ -263,8 +476,10 @@
                 console.error('Error saving order:', error);
                 showStatusMessage('Error saving order. Please try again.', 'bg-red-200 text-red-800');
             } finally {
-                saveAndCalculateBtn.textContent = 'Save Order & Calculate Change';
+                saveAndCalculateBtn.textContent = 'Cash';
                 saveAndCalculateBtn.disabled = false;
+                saveAndCardBtn.disabled = false;
+                fetchAndRenderOrders();
             }
         }
 
@@ -272,12 +487,19 @@
             renderMenuItems();
             renderCartItems();
             toggleSaveButtonState();
+            toggleCardButtonState();
         }
 
         function toggleSaveButtonState() {
             // The button is disabled if the cart is empty OR the order has already been saved
             saveAndCalculateBtn.disabled = Object.keys(cart).length === 0 || isOrderSaved;
         }
+
+        function toggleCardButtonState() {
+            // The button is disabled if the cart is empty OR the order has already been saved
+            saveAndCardBtn.disabled = Object.keys(cart).length === 0 || isOrderSaved;
+        }
+
 
         function calculateChange(total, paid) {
             hideStatusMessage();
@@ -287,6 +509,7 @@
             changeAmountElement.textContent = `$${change.toFixed(2)}`;
             renderChangeBreakdown(getChangeBreakdown(change));
             changeDisplay.classList.remove('hidden');
+            cartSection.scrollTop = cartSection.scrollHeight;
         }
 
         function getChangeBreakdown(amount) {
@@ -331,23 +554,40 @@
         function switchView(view) {
             if (view === 'menu') {
                 // This is the correct place to clear the cart based on the new logic
-                if (isOrderSaved)
-                {
+                if (isOrderSaved) {
                     clearCart();
                 }
                 menuSection.classList.remove('hidden');
                 cartSection.classList.add('hidden');
+                previousSection.classList.add('hidden');
                 showMenuBtn.classList.remove('bg-gray-200', 'text-gray-800');
                 showMenuBtn.classList.add('bg-blue-600', 'text-white');
                 showCartBtn.classList.add('bg-gray-200', 'text-gray-800');
                 showCartBtn.classList.remove('bg-blue-600', 'text-white');
-            } else {
+                showPreviousBtn.classList.add('bg-gray-200', 'text-gray-800');
+                showPreviousBtn.classList.remove('bg-blue-600', 'text-white');
+            }
+            else if (view == 'previous') {
+                menuSection.classList.add('hidden');
+                cartSection.classList.add('hidden');
+                previousSection.classList.remove('hidden');
+                showCartBtn.classList.add('bg-gray-200', 'text-gray-800');
+                showCartBtn.classList.remove('bg-blue-600', 'text-white');
+                showMenuBtn.classList.add('bg-gray-200', 'text-gray-800');
+                showMenuBtn.classList.remove('bg-blue-600', 'text-white');
+                showPreviousBtn.classList.remove('bg-gray-200', 'text-gray-800');
+                showPreviousBtn.classList.add('bg-blue-600', 'text-white');
+            }
+            else {
                 menuSection.classList.add('hidden');
                 cartSection.classList.remove('hidden');
+                previousSection.classList.add('hidden');
                 showCartBtn.classList.remove('bg-gray-200', 'text-gray-800');
                 showCartBtn.classList.add('bg-blue-600', 'text-white');
                 showMenuBtn.classList.add('bg-gray-200', 'text-gray-800');
                 showMenuBtn.classList.remove('bg-blue-600', 'text-white');
+                showPreviousBtn.classList.add('bg-gray-200', 'text-gray-800');
+                showPreviousBtn.classList.remove('bg-blue-600', 'text-white');
             }
         }
 
@@ -378,7 +618,11 @@
             renderCartItems();
             switchView('cart');
         });
+        showPreviousBtn.addEventListener('click', () => {
+            switchView('previous');
+        })
         saveAndCalculateBtn.addEventListener('click', saveOrderAndCalculateChange);
+        saveAndCardBtn.addEventListener('click', saveOrderAndCard);
         clearOrderBtn.addEventListener('click', clearCart);
         clearPaidBtn.addEventListener('click', () => {
             moneyPaidInput.value = '';
@@ -386,6 +630,8 @@
 
             hideStatusMessage();
         });
+
+
         billButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const value = parseFloat(button.dataset.value);
@@ -394,9 +640,145 @@
             });
         });
 
+
+        // Function to fetch and render the main orders table from the API
+        async function fetchAndRenderOrders() {
+            ordersLoadingPanel.classList.remove('hidden'); // Show loading panel
+            try {
+                const response = await fetch(getOrdersUrl + '?useSession=true');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                allOrders = await response.json();
+                filterAndSortData(); // Render the table with the fetched data
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+                ordersTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-red-500">Failed to load orders. Please try again.</td></tr>`;
+                totalOrdersSpan.textContent = '0';
+                totalAmountPaidSpan.textContent = '$0.00';
+            } finally {
+                ordersLoadingPanel.classList.add('hidden'); // Hide loading panel
+            }
+        }
+
+        // Function to render the table rows based on filtered and sorted data
+        function renderTable(data) {
+            ordersTableBody.innerHTML = '';
+            if (data.length === 0) {
+                noOrdersMessage.classList.remove('hidden');
+            } else {
+                noOrdersMessage.classList.add('hidden');
+                data.forEach(order => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-100 transition-colors duration-200 cursor-pointer';
+                    const formattedDate = new Date(order.transactionDateTime).toLocaleString();
+                    const cardOrCash = order.isCard == 1 ? "Card" : "Cash";
+                    row.innerHTML = `
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${order.amountPaid.toFixed(2)}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cardOrCash}</td>
+                                        `;
+
+                    // Add a click listener to the row to show the details modal
+                    row.addEventListener('click', () => showOrderDetails(order));
+                    ordersTableBody.appendChild(row);
+                });
+            }
+        }
+
+        // Function to show order details in the modal
+        function showOrderDetails(order) {
+            const formattedDate = new Date(order.transactionDateTime).toLocaleString();
+            modalBody.innerHTML = `
+                                    <p><strong>Order ID:</strong> ${order.orderId}</p>
+                                    <p><strong>Transaction Date:</strong> ${formattedDate}</p>
+                                    <p><strong>Amount Paid:</strong> $${order.amountPaid.toFixed(2)}</p>
+                                    <p><strong>Order Type:</strong> Concession</p>
+                                    <h3 class="font-bold text-lg mt-4 mb-2">Items</h3>
+                                    <ul class="list-disc list-inside space-y-2">
+                                        ${order.orderItems.map(item => `
+                                            <li class="flex justify-between items-center text-gray-700">
+                                                <span>${item.quantity} x ${item.itemName}</span>
+                                                <span>$${(item.quantity * item.unitPrice).toFixed(2)}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                `;
+
+            // Show the modal
+            orderDetailsModal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                orderDetailsModal.classList.add('hidden');
+            }, 300);
+        }
+
+        function filterAndSortData() {
+            let filteredData = [...allOrders];
+            const searchTerm = searchInput.value.toLowerCase();
+            const sortType = sortSelect.value;
+
+            // Filter by search term
+            if (searchTerm) {
+                filteredData = filteredData.filter(order =>
+                    order.orderId.toLowerCase().includes(searchTerm) ||
+                    order.amountPaid.toFixed(2).includes(searchTerm)
+                );
+            }
+
+            // Sort the data
+            filteredData.sort((a, b) => {
+                switch (sortType) {
+                    case 'TransactionDateTimeAsc':
+                        return new Date(a.transactionDateTime) - new Date(b.transactionDateTime);
+                    case 'TransactionDateTimeDesc':
+                        return new Date(b.transactionDateTime) - new Date(a.transactionDateTime);
+                    case 'AmountPaidAsc':
+                        return a.amountPaid - b.amountPaid;
+                    case 'AmountPaidDesc':
+                        return b.amountPaid - a.amountPaid;
+                    default:
+                        return 0;
+                }
+            });
+
+            // Calculate totals for the filtered data
+            const totalOrders = filteredData.length;
+            const totalAmountPaid = filteredData.reduce((sum, order) => sum + order.amountPaid, 0);
+
+            // Update the totals in the summary div
+            totalOrdersSpan.textContent = totalOrders;
+            totalAmountPaidSpan.textContent = `$${totalAmountPaid.toFixed(2)}`;
+
+            renderTable(filteredData);
+        }
+
+        // Add event listeners for controls
+        searchInput.addEventListener('input', filterAndSortData);
+        sortSelect.addEventListener('change', filterAndSortData);
+        closeModalBtn.addEventListener('click', closeModal);
+        // Close modal when clicking outside of it
+        orderDetailsModal.addEventListener('click', (event) => {
+            if (event.target === orderDetailsModal) {
+                closeModal();
+            }
+        });
+
+       
+
         // --- INITIALIZATION ---
         getMenuItems();
         updateViews();
         switchView('menu');
+        fetchAndRenderOrders();
     });
 </script>

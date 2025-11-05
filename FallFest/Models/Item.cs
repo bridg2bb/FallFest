@@ -9,6 +9,9 @@ namespace FallFest.Models
         [Column("ItemID")]
         public int ItemID { get; set; }
 
+        [Required]
+        public int ItemTypeID { get; set; }
+
         [Column("ItemName")]
         public string ItemName { get; set; }
 
@@ -19,6 +22,20 @@ namespace FallFest.Models
         public int OrderTypeId { get; set; }
 
         public bool Enabled { get; set; }
+
+
+        [Required]
+        public int SortOrder { get; set; } = 1;
+
+    
+        [ForeignKey("OrderTypeID")]
+        public OrderType OrderType { get; set; }
+
+
+        [ForeignKey("ItemTypeID")]
+        public ItemType ItemType { get; set; }
+
+        public ICollection<OrderItem> OrderItems { get; set; }
     }
 
    

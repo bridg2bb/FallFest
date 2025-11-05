@@ -11,5 +11,7 @@ namespace FallFest.Models
 
         // Navigation property
         public ICollection<Order> Orders { get; set; }
+
+   
     }
 }

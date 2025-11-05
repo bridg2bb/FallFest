@@ -57,7 +57,8 @@ namespace FallFest.Controllers
                     AmountReturned = orderData.AmountReturned,
                     OrderType = _context.OrderTypes.Single(x => x.OrderTypeID == 2),
                     TransactionDateTime = DateTime.Now, 
-                    OrderID = Guid.NewGuid()
+                    OrderID = Guid.NewGuid(),
+                    IsCard = orderData.IsCard
                 };
 
                 _context.Orders.Add(newOrder);
@@ -164,6 +165,7 @@ namespace FallFest.Controllers
                     orderId = o.OrderID,
                     amountPaid = o.AmountPaid,
                     transactionDateTime = o.TransactionDateTime.ToString("MM/dd/yyyy hh:mm tt"),
+                    isCard = o.IsCard,
                     orderItems = o.OrderItems.Select(oi => new
                     {
                         itemName = oi.Item.ItemName,

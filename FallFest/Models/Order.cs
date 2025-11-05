@@ -13,9 +13,13 @@ namespace FallFest.Models
         public int OrderTypeID { get; set; }
         public DateTime TransactionDateTime { get; set; }
 
+        public bool IsCard{ get; set; }
+
         // Navigation properties for relationships
         public OrderType OrderType { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; }
+
+        public string SessionId { get; set; }
 
         public string OrderItemsJson { get { return JsonSerializer.Serialize(OrderItems); } }
     }
@@ -27,6 +31,9 @@ namespace FallFest.Models
         public decimal AmountPaid { get; set; }
         public decimal AmountReturned { get; set; }
         public System.DateTime TransactionDateTime { get; set; }
+
+        public bool IsCard { get; set; }
+        public string SessionId { get; set; }
     }
 
     // ViewModel for a single item in the order
@@ -35,5 +42,7 @@ namespace FallFest.Models
         public string Name { get; set; }
         public int Quantity { get; set; }
         public decimal Price { get; set; }
+        public bool IsCard { get; set; }
+        public string SessionId { get; set; }
     }
 }

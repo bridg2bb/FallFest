@@ -19,7 +19,7 @@ namespace FallFest.Controllers
         private const int _orderTypeId = 1;
 
 
-         // Constructor with Dependency Injection
+        // Constructor with Dependency Injection
         public ConcessionsController(
             ILogger<ConcessionsController> logger,
             ApplicationDbContext context,
@@ -30,6 +30,19 @@ namespace FallFest.Controllers
             _configuration = configuration;
         }
 
+        public string SessionId
+        {
+            get
+            {
+                var sessionId = HttpContext.Session.GetString("sessionId");
+                if (string.IsNullOrEmpty(sessionId))
+                {
+                    sessionId = Guid.NewGuid().ToString();
+                    HttpContext.Session.SetString("sessionId", sessionId);
+                }
+                return sessionId;
+            }
+        }
         // The main action to render the view
         public IActionResult Index()
         {
@@ -57,8 +70,11 @@ namespace FallFest.Controllers
                     AmountPaid = orderData.AmountPaid,
                     AmountReturned = orderData.AmountReturned,
                     OrderType = _context.OrderTypes.Single(x => x.OrderTypeID == _orderTypeId),
-                    TransactionDateTime = DateTime.Now, 
-                    OrderID = Guid.NewGuid()
+                    TransactionDateTime = DateTime.Now,
+                    OrderID = Guid.NewGuid(),
+                    IsCard = orderData.IsCard,
+                    SessionId = SessionId
+
                 };
 
                 _context.Orders.Add(newOrder);
@@ -82,7 +98,7 @@ namespace FallFest.Controllers
                     _context.OrderItems.Add(orderItem);
                 }
 
-                 await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Order saved successfully with ID: {OrderId}", newOrder.OrderID);
                 return Ok(new { success = true, message = "Order saved successfully." });
@@ -110,12 +126,37 @@ namespace FallFest.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMenuItems()
         {
-           
-            // Only retrieve items with OrderTypeId = 1
-            var menuItems = await _context.Items
-                                .Where(item => item.OrderTypeId == _orderTypeId && item.Enabled)
-                                .ToListAsync();
-            return Json(menuItems);
+            int targetOrderTypeId = 1;
+
+            // Use a projection to shape the data, preventing serialization cycles 
+            // and ensuring only necessary fields are sent.
+            var menuItemsGrouped = await _context.ItemTypes
+                // 1. Order ItemTypes first
+                .OrderBy(it => it.SortOrder)
+                .Select(it => new
+                {
+                    // ItemType Properties
+                    ItemTypeID = it.ItemTypeID,
+                    ItemTypeName = it.ItemTypeName,
+
+                    // Item List (Projected and Filtered/Sorted)
+                    Items = it.Items
+                        .Where(item => item.OrderTypeId == targetOrderTypeId && item.Enabled)
+                        .OrderBy(item => item.SortOrder)
+                        .Select(item => new
+                        {
+                            ItemID = item.ItemID,
+                            ItemName = item.ItemName,
+                            UnitPrice = item.UnitPrice,
+                            ItemTypeID = item.ItemTypeID
+
+                        })
+                        .ToList()
+                })
+                .Where(group => group.Items.Any())
+                .ToListAsync();
+
+            return Json(menuItemsGrouped);
         }
 
         [HttpGet]
@@ -128,22 +169,22 @@ namespace FallFest.Controllers
 
                 foreach (var order in orders)
                 {
-                    
-                            foreach (var item in order.OrderItems)
+
+                    foreach (var item in order.OrderItems)
+                    {
+                        if (!itemTotals.ContainsKey(item.Item.ItemName))
+                        {
+                            itemTotals[item.Item.ItemName] = new ItemTotalViewModel
                             {
-                                if (!itemTotals.ContainsKey(item.Item.ItemName))
-                                {
-                                    itemTotals[item.Item.ItemName] = new ItemTotalViewModel
-                                    {
-                                        ItemName = item.Item.ItemName,
-                                        QuantitySold = 0,
-                                        TotalRevenue = 0
-                                    };
-                                }
-                                itemTotals[item.Item.ItemName].QuantitySold += item.Quantity;
-                                itemTotals[item.Item.ItemName].TotalRevenue += item.Quantity * item.UnitPrice;
-                            }
-                        
+                                ItemName = item.Item.ItemName,
+                                QuantitySold = 0,
+                                TotalRevenue = 0
+                            };
+                        }
+                        itemTotals[item.Item.ItemName].QuantitySold += item.Quantity;
+                        itemTotals[item.Item.ItemName].TotalRevenue += item.Quantity * item.UnitPrice;
+                    }
+
                 }
                 var finalTotals = itemTotals.Values.Select(v => new
                 {
@@ -161,13 +202,13 @@ namespace FallFest.Controllers
             }
         }
         [HttpGet]
-        public async Task<IActionResult> GetOrders()
+        public async Task<IActionResult> GetOrders(bool useSession = false)
         {
             try
             {
                 // Get all orders with their related order items and item details
                 var orders = await _context.Orders
-                    .Where(o => o.OrderTypeID == _orderTypeId)
+                    .Where(o => o.OrderTypeID == _orderTypeId && (!useSession || o.SessionId == SessionId))
                     .Include(o => o.OrderItems)
                         .ThenInclude(oi => oi.Item)
                     .OrderByDescending(o => o.TransactionDateTime)
@@ -179,6 +220,7 @@ namespace FallFest.Controllers
                     orderId = o.OrderID,
                     amountPaid = o.AmountPaid,
                     transactionDateTime = o.TransactionDateTime.ToString("MM/dd/yyyy hh:mm tt"),
+                    isCard = o.IsCard,
                     orderItems = o.OrderItems.Select(oi => new
                     {
                         itemName = oi.Item.ItemName,
