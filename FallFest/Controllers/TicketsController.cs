@@ -16,6 +16,8 @@ namespace FallFest.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
 
+        private const int _orderTypeId = 2;
+
         // Constructor with Dependency Injection
         public TicketsController(
             ILogger<TicketsController> logger,
@@ -29,6 +31,11 @@ namespace FallFest.Controllers
 
         // The main action to render the view
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Dashboard()
         {
             return View();
         }
@@ -94,6 +101,84 @@ namespace FallFest.Controllers
                                 .Where(item => item.OrderTypeId == 2 && item.Enabled)
                                 .ToListAsync();
             return Json(menuItems);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetItemTotals()
+        {
+            try
+            {
+                var orders = await _context.Orders.Where(x => x.OrderItems.Any(y => y.Item.Enabled && y.Item.OrderTypeId == _orderTypeId)).Include(x => x.OrderItems).ThenInclude(y => y.Item).ToListAsync();
+                var itemTotals = new Dictionary<string, ItemTotalViewModel>();
+
+                foreach (var order in orders)
+                {
+
+                    foreach (var item in order.OrderItems)
+                    {
+                        if (!itemTotals.ContainsKey(item.Item.ItemName))
+                        {
+                            itemTotals[item.Item.ItemName] = new ItemTotalViewModel
+                            {
+                                ItemName = item.Item.ItemName,
+                                QuantitySold = 0,
+                                TotalRevenue = 0
+                            };
+                        }
+                        itemTotals[item.Item.ItemName].QuantitySold += item.Quantity;
+                        itemTotals[item.Item.ItemName].TotalRevenue += item.Quantity * item.UnitPrice;
+                    }
+
+                }
+                var finalTotals = itemTotals.Values.Select(v => new
+                {
+                    itemName = v.ItemName,
+                    quantitySold = v.QuantitySold,
+                    totalRevenue = v.TotalRevenue
+                }).ToList();
+
+                return Json(finalTotals);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get item totals.");
+                return StatusCode(500, "An error occurred while retrieving item totals.");
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetOrders()
+        {
+            try
+            {
+                // Get all orders with their related order items and item details
+                var orders = await _context.Orders
+                    .Where(o => o.OrderTypeID == _orderTypeId)
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Item)
+                    .OrderByDescending(o => o.TransactionDateTime)
+                    .ToListAsync();
+
+                // Project the data into a new, anonymous object to ensure proper JSON serialization
+                var finalOrders = orders.Select(o => new
+                {
+                    orderId = o.OrderID,
+                    amountPaid = o.AmountPaid,
+                    transactionDateTime = o.TransactionDateTime.ToString("MM/dd/yyyy hh:mm tt"),
+                    orderItems = o.OrderItems.Select(oi => new
+                    {
+                        itemName = oi.Item.ItemName,
+                        quantity = oi.Quantity,
+                        unitPrice = oi.UnitPrice
+                    }).ToList()
+                }).ToList();
+
+                return Json(finalOrders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get orders.");
+                return StatusCode(500, "An error occurred while retrieving orders.");
+            }
         }
     }
 }

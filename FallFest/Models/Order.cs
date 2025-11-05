@@ -1,6 +1,7 @@
 ﻿// Models/Order.cs
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace FallFest.Models
 {
@@ -15,13 +16,8 @@ namespace FallFest.Models
         // Navigation properties for relationships
         public OrderType OrderType { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; }
-    }
 
-    public class OrderStats
-    {
-        public int TotalOrders { get; set; }
-        public double TotalAmount { get; set; }
-        public Guid OrderId { get; set; }
+        public string OrderItemsJson { get { return JsonSerializer.Serialize(OrderItems); } }
     }
 
     // ViewModel to handle incoming data from the client-side JavaScript

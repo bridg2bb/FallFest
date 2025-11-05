@@ -20,4 +20,13 @@ namespace FallFest.Models
 
         public bool Enabled { get; set; }
     }
+
+   
+    public class ItemTotalViewModel
+    {
+        public string ItemName;
+        public decimal QuantitySold = 0;
+        public decimal TotalRevenue = 0;
+    }
 }
+
