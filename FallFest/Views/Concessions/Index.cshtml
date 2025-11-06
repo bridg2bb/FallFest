@@ -1,31 +1,32 @@
-﻿<!-- Loading Overlay -->
-<div id="loading-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-xl transition-opacity duration-300">
+﻿
+
+<!-- Loading Overlay -->
+<aside id="loading-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-xl transition-opacity duration-300">
     <div class="spinner"></div>
     <div class="mt-4 text-gray-700 font-semibold">Loading menu...</div>
-</div>
+</aside>
 
-<div class="flex flex-col h-dvh w-full mx-auto max-w-5xl shadow-2xl bg-white border border-gray-100">
-    <header class="flex-shrink-0 h-[50px] flex items-center justify-between px-4 shadow-md">
+<main class="flex flex-col h-dvh w-full mx-auto max-w-5xl shadow-2xl bg-white border border-gray-100">
+    <section class="flex-shrink-0 h-[50px] flex items-center justify-between px-4 shadow-md">
 
         <button id="show-menu-btn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow">
-            Menu
+            Current Order
         </button>
         <button id="show-cart-btn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow">
-            Order (<span id="cart-item-count">0</span>)
+            <i class="fa-solid fa-cart-shopping"></i> Checkout (<span id="cart-item-count">0</span>)
         </button>
-    </header>
+    </section>
 
     <!-- Menu View -->
-    <main id="menu-section" class="flex-grow overflow-y-auto">
-        <div class="space-y-4 pt-4">
-            <div id="items-container" class="grid grid-cols-3 gap-4">
-                <!-- Menu items will be dynamically rendered here -->
-            </div>
+    <section id="menu-section" class="flex-grow overflow-y-auto pb-4 px-4 md:p-10">
+
+        <div id="items-container" class="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-4">
+            <!-- Menu items will be dynamically rendered here -->
         </div>
-    </main>
+    </section>
 
     <!-- Previous View -->
-    <main id="previous-section" class="flex-grow overflow-y-auto">
+    <section id="previous-section" class="flex-grow overflow-y-auto p-4 md:p-10">
 
         <!-- Loading Panel for Orders -->
         <div id="ordersLoadingPanel" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 hidden">
@@ -63,10 +64,16 @@
                             Date/Time
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Amount Paid
+                            Card or Cash
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            Card or Cash
+                            Total
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Paid
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            Returned
                         </th>
                     </tr>
                 </thead>
@@ -82,6 +89,9 @@
                 Total Orders: <span id="totalOrders" class="text-blue-600">0</span>
             </div>
             <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
+                Total Billed: <span id="totalAmountBilled" class="text-blue-600">$0.00</span>
+            </div>
+            <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
                 Total Amount Paid: <span id="totalAmountPaid" class="text-blue-600">$0.00</span>
             </div>
         </div>
@@ -90,80 +100,85 @@
         <div id="noOrdersMessage" class="hidden text-center text-gray-500 mt-6 p-4 border border-dashed border-gray-300 rounded-lg">
             No orders found matching the current criteria.
         </div>
-    </main>
+    </section>
 
-<!-- Cart View -->
-<aside id="cart-section" class="flex-grow overflow-y-auto">
-    <div class="flex-1 overflow-hidden">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Your Order</h2>
-        <ul id="cart-list" class="space-y-2 mb-4 scrollable-content">
-            <!-- Cart items will be dynamically rendered here -->
-        </ul>
-    </div>
-
-    <div class="mt-auto pt-4 border-t-2 border-dashed border-gray-300">
-        <div class="flex justify-between items-center py-2">
-            <span class="text-xl font-bold text-gray-900">Total:</span>
-            <span id="total-price" class="text-2xl font-extrabold text-green-600">$0.00</span>
+    <!-- Cart View -->
+    <section id="cart-section" class="flex-grow overflow-y-auto p-4 md:p-10">
+        <div class="flex-1 overflow-hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Your Order</h2>
+            <ul id="cart-list" class="space-y-2 mb-4 scrollable-content">
+                <!-- Cart items will be dynamically rendered here -->
+            </ul>
         </div>
 
-        <div class="flex items-center mt-4">
-            <label for="money-paid" class="text-sm font-bold text-gray-900 mr-2">Cash Paid:</label>
-            <input type="number" id="money-paid" step="0.01" class="flex-grow p-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
+        <div class="mt-auto pt-4 border-t-2 border-dashed border-gray-300">
+            <div class="flex justify-between items-center py-2">
+                <span class="text-xl font-bold text-gray-900">Total:</span>
+                <span id="total-price" class="text-2xl font-extrabold text-green-600">$0.00</span>
+            </div>
 
-        <div class="flex flex-wrap justify-center gap-2 mt-2">
-            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="1"> $1 </button>
-            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="5"> $5 </button>
-            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="10"> $10 </button>
-            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="20"> $20 </button>
-            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="50"> $50 </button>
-            <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value=".25"> $0.25 </button>
-            <button id="clear-paid-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105"> Clear </button>
-        </div>
+            <div class="flex items-center mt-4">
+                <label for="money-paid" class="text-sm font-bold text-gray-900 mr-2">Cash Paid:</label>
+                <input type="number" id="money-paid" step="0.01" class="flex-grow p-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
 
-        <div id="status-message" class="mt-4 p-2 text-center rounded-lg font-semibold hidden"></div>
+            <div class="flex flex-wrap justify-center gap-2 mt-2">
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="1"> $1 </button>
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="5"> $5 </button>
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="10"> $10 </button>
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="20"> $20 </button>
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value="50"> $50 </button>
+                <button class="bill-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105" data-value=".25"> $0.25 </button>
+                <button id="clear-paid-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-3 rounded-lg shadow-sm transition transform hover:scale-105"> Clear </button>
+            </div>
+
+            <div id="status-message" class="mt-4 p-2 text-center rounded-lg font-semibold hidden"></div>
 
 
-        <button id="save-and-calculate-btn" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow-md transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-            Cash
-        </button>
+            <button id="save-and-calculate-btn" class="w-full mt-4 bg-green-500 text-lg hover:bg-green-300 text-white py-3 rounded-lg shadow-md transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <i class="fa fa-money-bill" aria-hidden="true"></i>
+                <span id="save-and-calculate-lbl">Cash</span>
+            </button>
 
-        <button id="save-and-card-btn" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg shadow-md transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-            Card
-        </button>
+            <button id="save-and-card-btn" class="w-full mt-4 bg-green-500 text-lg hover:bg-green-300 text-white py-3 rounded-lg shadow-md transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <i class="fa fa-credit-card" aria-hidden="true"></i> 
+                <span id="save-and-card-lbl">Card</span>
+            </button>
 
-        <div id="change-display" class="mt-4 p-3 bg-yellow-100 rounded-lg shadow-inner hidden">
-            <h4 class="text-lg font-bold text-gray-800 mb-2">
-                <span id="amount-paid" class="text-m font-bold text-gray-800"></span>
-                <span class="text-m font-bold text-gray-800">&nbsp;-&nbsp;</span>
-                <span id="total-cost" class="text-m font-bold text-gray-800"></span>
-                <span class="text-m font-bold text-gray-800">&nbsp;=&nbsp;</span>
-            </h4>
+            <div id="change-display" class="mt-4 p-3 bg-yellow-100 rounded-lg shadow-inner hidden">
+              
+                <div class="text-md font-bold text-gray-800 flex">
+                    <span class="money-label">Paid</span>
+                    <span id="amount-paid" class="text-md font-bold text-gray-800"></span>
+                </div>
+                <div class="text-md font-bold text-gray-800 flex">
+                    <span class="money-label">Total</span>
+                    <span id="total-cost" class="text-md font-bold text-gray-800"></span>
+                </div>
 
-            <h3 class="text-lg font-bold text-gray-800 mb-2">
-                Change Due: <span id="change-amount" class="text-xl font-extrabold text-purple-700"></span>
-            </h3>
-            <div id="change-breakdown" class="grid grid-cols-2 gap-1 text-sm text-gray-700">
+                <div class="text-md font-bold text-gray-800 mb-2 border-t-2 border-dashed border-gray-300 flex">
+                    <span class="money-label">Change</span>
+                    <span id="change-amount" class="text-md font-bold text-gray-800"></span>
+                </div>
+                <div id="change-breakdown" class="text-md font-bold text-gray-800 pt-4">
+                </div>
             </div>
         </div>
-    </div>
-</aside>
-<footer class="flex-shrink-0 h-[50px] flex items-center justify-between px-4 shadow-md">
-    <button id="clear-order-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded-lg shadow">
-        Clear (without saving)
-    </button>
+    </section>
+    <section class="flex-shrink-0 h-[50px] flex items-center justify-between px-4 shadow-md">
+        <button id="clear-order-btn" class="flex-1 text-md bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded-lg shadow">
+            Clear (no saving)
+        </button>
 
-    <button id="show-previous-btn" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow">
-        Previous
-    </button>
-</footer>
-</div>
+        <button id="show-previous-btn" class="flex-1 text-md bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg shadow">
+            Previous
+        </button>
+    </section>
+</main>
 <div id="orderDetailsModal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto transform transition-all scale-95 opacity-0 duration-300 ease-out" id="modalContent">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-900">Order Details</h2>
                 <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
                     <i class="fas fa-times fa-lg"></i>
                 </button>
@@ -191,6 +206,8 @@
         const clearPaidBtn = document.getElementById('clear-paid-btn');
         const saveAndCalculateBtn = document.getElementById('save-and-calculate-btn');
         const saveAndCardBtn = document.getElementById('save-and-card-btn');
+        const saveAndCalculateLbl = document.getElementById('save-and-calculate-lbl');
+        const saveAndCardLbl = document.getElementById('save-and-card-lbl');
         const clearOrderBtn = document.getElementById('clear-order-btn');
         const cartItemCount = document.getElementById('cart-item-count');
         const statusMessageDiv = document.getElementById('status-message');
@@ -211,6 +228,7 @@
         const modalBody = document.getElementById('modalBody');
         const totalOrdersSpan = document.getElementById('totalOrders');
         const totalAmountPaidSpan = document.getElementById('totalAmountPaid');
+        const totalAmountBilledSpan = document.getElementById('totalAmountBilled');
         const totalQuantitySoldSpan = document.getElementById('totalQuantitySold');
         const totalRevenueSpan = document.getElementById('totalRevenue');
         const ordersLoadingPanel = document.getElementById('ordersLoadingPanel');
@@ -219,7 +237,7 @@
         // --- State Management ---
         let menuItems = [];
         let cart = {}; // Use an object for efficient lookups
-        let isOrderSaved = false; 
+        let isOrderSaved = false;
         let allOrders = [];
 
         // --- API URLS (Razor Syntax) ---
@@ -267,7 +285,7 @@
 
                 // --- Create Group Header ---
                 const headerDiv = document.createElement('div');
-                headerDiv.className = 'w-full col-span-3'; // Full width, margin for spacing
+                headerDiv.className = 'w-full col-span-3 md:col-span-4'; // Full width, margin for spacing
                 headerDiv.innerHTML = `<h2 class="text-md font-extrabold text-gray-700 border-b-2 border-indigo-400 pb-1">${itemType.itemTypeName}</h2>`;
                 itemsContainer.appendChild(headerDiv);
 
@@ -278,20 +296,20 @@
                     const count = cart[item.itemID] ? cart[item.itemID].quantity : 0;
                     const itemDiv = document.createElement('div');
 
-                    itemDiv.className = 'bg-white rounded-lg p-3 shadow-md flex flex-col justify-between items-center text-center transition-transform hover:scale-105 hover:shadow-lg cursor-pointer';
+                    itemDiv.className = 'bg-white rounded-lg p-2 md:p-6 shadow-md flex flex-col justify-between items-center text-center transition-transform hover:scale-105 hover:shadow-lg cursor-pointer';
 
                     itemDiv.innerHTML = `
-                                <h3 class="text-xs font-bold text-gray-800">${item.itemName} (${count})</h3>
-                                <p class="text-xs font-semibold text-gray-600 mt-1">$${item.unitPrice.toFixed(2)}</p>
-                                <div class="flex gap-1 mt-1 w-full">
-                                    <button class="add-item-btn flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-1 rounded-lg shadow transition transform hover:scale-105" data-item-id="${item.itemID}">
-                                        &plus;
-                                    </button>
-                                    <button class="remove-item-btn flex-1 bg-red-500 text-white font-semibold py-1 px-1 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" data-item-id="${item.itemID}" ${count === 0 ? 'disabled' : ''}>
-                                        &minus;
-                                    </button>
-                                </div>
-                            `;
+                                                    <h3 class="text-xs font-bold text-gray-800">${item.itemName} (${count})</h3>
+                                                    <p class="text-xs font-semibold text-gray-600 mt-1">$${item.unitPrice.toFixed(2)}</p>
+                                                    <div class="flex gap-1 mt-1 w-full">
+                                                        <button class="add-item-btn flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-1 rounded-lg shadow transition transform hover:scale-105" data-item-id="${item.itemID}">
+                                                            &plus;
+                                                        </button>
+                                                        <button class="remove-item-btn flex-1 bg-red-500 text-white font-semibold py-1 px-1 rounded-lg shadow transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" data-item-id="${item.itemID}" ${count === 0 ? 'disabled' : ''}>
+                                                            &minus;
+                                                        </button>
+                                                    </div>
+                                                `;
 
                     itemsContainer.appendChild(itemDiv);
                 });
@@ -316,12 +334,12 @@
                     const listItem = document.createElement('li');
                     listItem.className = 'flex justify-between items-center text-gray-700 font-medium bg-gray-100 p-2 rounded';
                     listItem.innerHTML = `
-                                                        <div class="flex-1">${item.itemName}</div>
-                                                        <div class="flex items-center space-x-2">
-                                                            <span class="font-bold">${item.quantity}</span>
-                                                            <span class="font-bold text-green-600">$${itemTotal.toFixed(2)}</span>
-                                                        </div>
-                                                    `;
+                                                                            <div class="flex-1">${item.itemName}</div>
+                                                                            <div class="flex items-center space-x-2">
+                                                                                <span class="font-bold">${item.quantity}</span>
+                                                                                <span class="font-bold text-green-600">$${itemTotal.toFixed(2)}</span>
+                                                                            </div>
+                                                                        `;
                     cartList.appendChild(listItem);
                 });
             }
@@ -371,7 +389,7 @@
 
 
             saveAndCalculateBtn.disabled = true;
-            saveAndCardBtn.textContent = 'Saving...';
+            saveAndCardLbl.textContent = 'Saving...';
             saveAndCardBtn.disabled = true;
 
             const total = parseFloat(totalPriceElement.textContent.replace('$', ''));
@@ -408,9 +426,10 @@
                 console.error('Error saving order:', error);
                 showStatusMessage('Error saving order. Please try again.', 'bg-red-200 text-red-800');
             } finally {
-                saveAndCardBtn.textContent = 'Card';
+                saveAndCardLbl.textContent = 'Card';
                 saveAndCardBtn.disabled = false;
                 saveAndCalculateBtn.disabled = false;
+                showMenuBtn.textContent = "New Order";
                 fetchAndRenderOrders();
             }
         }
@@ -427,7 +446,7 @@
             }
 
 
-            saveAndCalculateBtn.textContent = 'Saving...';
+            saveAndCalculateLbl.textContent = 'Saving...';
             saveAndCalculateBtn.disabled = true;
             saveAndCardBtn.disabled = true;
 
@@ -436,7 +455,7 @@
 
             if (isNaN(paid) || paid < total) {
                 showStatusMessage('Amount paid is less than the total!', 'bg-red-200 text-red-800');
-                saveAndCalculateBtn.textContent = 'Cash';
+                saveAndCalculateLbl.textContent = 'Cash';
                 saveAndCalculateBtn.disabled = false;
                 saveAndCardBtn.disabled = false;
                 changeDisplay.classList.add('hidden');
@@ -476,9 +495,10 @@
                 console.error('Error saving order:', error);
                 showStatusMessage('Error saving order. Please try again.', 'bg-red-200 text-red-800');
             } finally {
-                saveAndCalculateBtn.textContent = 'Cash';
+                saveAndCalculateLbl.textContent = 'Cash';
                 saveAndCalculateBtn.disabled = false;
                 saveAndCardBtn.disabled = false;
+                showMenuBtn.textContent = "New Order";
                 fetchAndRenderOrders();
             }
         }
@@ -535,8 +555,8 @@
             changeBreakdownElement.innerHTML = '';
             for (const [name, count] of Object.entries(breakdown)) {
                 const div = document.createElement('div');
-                div.className = 'flex justify-between items-center';
-                div.innerHTML = `<span>${name}</span><span class="font-bold">${count}</span>`;
+                div.className = 'font-bold text-md flex';
+                div.innerHTML = `<span class="money-label">${count}x</span><span>${name}</span>`;
                 changeBreakdownElement.appendChild(div);
             }
         }
@@ -566,6 +586,7 @@
                 showCartBtn.classList.remove('bg-blue-600', 'text-white');
                 showPreviousBtn.classList.add('bg-gray-200', 'text-gray-800');
                 showPreviousBtn.classList.remove('bg-blue-600', 'text-white');
+                showMenuBtn.textContent = "Current Order";
             }
             else if (view == 'previous') {
                 menuSection.classList.add('hidden');
@@ -656,6 +677,7 @@
                 ordersTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-red-500">Failed to load orders. Please try again.</td></tr>`;
                 totalOrdersSpan.textContent = '0';
                 totalAmountPaidSpan.textContent = '$0.00';
+                totalAmountBilledSpan.textContent = '$0.00';
             } finally {
                 ordersLoadingPanel.classList.add('hidden'); // Hide loading panel
             }
@@ -674,10 +696,12 @@
                     const formattedDate = new Date(order.transactionDateTime).toLocaleString();
                     const cardOrCash = order.isCard == 1 ? "Card" : "Cash";
                     row.innerHTML = `
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${order.amountPaid.toFixed(2)}</td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cardOrCash}</td>
-                                        `;
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cardOrCash}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${order.amountOwed.toFixed(2)}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${order.amountPaid.toFixed(2)}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${order.amountReturned.toFixed(2)}</td>
+                                    `;
 
                     // Add a click listener to the row to show the details modal
                     row.addEventListener('click', () => showOrderDetails(order));
@@ -689,11 +713,14 @@
         // Function to show order details in the modal
         function showOrderDetails(order) {
             const formattedDate = new Date(order.transactionDateTime).toLocaleString();
+            const cardOrCash = order.isCard == 1 ? "Card" : "Cash";
             modalBody.innerHTML = `
-                                    <p><strong>Order ID:</strong> ${order.orderId}</p>
+                                    <p class="text-xs"><strong>Order ID:</strong> ${order.orderId}</p>
                                     <p><strong>Transaction Date:</strong> ${formattedDate}</p>
-                                    <p><strong>Amount Paid:</strong> $${order.amountPaid.toFixed(2)}</p>
-                                    <p><strong>Order Type:</strong> Concession</p>
+                                    <p><strong>Payment Method:</strong> ${cardOrCash}</p>
+                                    <p><strong>Total:</strong> $${order.amountOwed.toFixed(2)}</p>
+                                    <p><strong>Paid:</strong> $${order.amountPaid.toFixed(2)}</p>
+                                    <p><strong>Returned:</strong> $${order.amountReturned.toFixed(2)}</p>
                                     <h3 class="font-bold text-lg mt-4 mb-2">Items</h3>
                                     <ul class="list-disc list-inside space-y-2">
                                         ${order.orderItems.map(item => `
@@ -703,7 +730,7 @@
                                             </li>
                                         `).join('')}
                                     </ul>
-                                `;
+                                   `;
 
             // Show the modal
             orderDetailsModal.classList.remove('hidden');
@@ -754,10 +781,11 @@
             // Calculate totals for the filtered data
             const totalOrders = filteredData.length;
             const totalAmountPaid = filteredData.reduce((sum, order) => sum + order.amountPaid, 0);
-
+            const totalAmountBilled = filteredData.reduce((sum, order) => sum + order.amountOwed, 0)
             // Update the totals in the summary div
             totalOrdersSpan.textContent = totalOrders;
             totalAmountPaidSpan.textContent = `$${totalAmountPaid.toFixed(2)}`;
+            totalAmountBilledSpan.textContent = `$${totalAmountBilled.toFixed(2)}`;
 
             renderTable(filteredData);
         }
@@ -773,7 +801,7 @@
             }
         });
 
-       
+
 
         // --- INITIALIZATION ---
         getMenuItems();

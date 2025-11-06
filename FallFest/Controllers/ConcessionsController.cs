@@ -46,11 +46,13 @@ namespace FallFest.Controllers
         // The main action to render the view
         public IActionResult Index()
         {
+            ViewData["Title"] = "Concessions";
             return View();
         }
 
         public IActionResult Dashboard()
         {
+            ViewData["Title"] = "Dashboard";
             return View();
         }
 
@@ -219,6 +221,8 @@ namespace FallFest.Controllers
                 {
                     orderId = o.OrderID,
                     amountPaid = o.AmountPaid,
+                    amountOwed = o.AmountPaid - o.AmountReturned,
+                    amountReturned = o.AmountReturned,
                     transactionDateTime = o.TransactionDateTime.ToString("MM/dd/yyyy hh:mm tt"),
                     isCard = o.IsCard,
                     orderItems = o.OrderItems.Select(oi => new

@@ -104,13 +104,19 @@
                     <thead class="bg-gray-100">
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Order ID
+                                Date/Time
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Transaction Date
+                                Card or Cash
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Amount Paid
+                                Total
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Paid
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Returned
                             </th>
                         </tr>
                     </thead>
@@ -124,6 +130,9 @@
             <div class="flex flex-col md:flex-row justify-end mt-6 space-y-4 md:space-y-0 md:space-x-8 text-lg font-bold">
                 <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
                     Total Orders: <span id="totalOrders" class="text-blue-600">0</span>
+                </div>
+                <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
+                    Total Billed: <span id="totalAmountBilled" class="text-blue-600">$0.00</span>
                 </div>
                 <div class="p-4 bg-gray-100 rounded-lg shadow-sm">
                     Total Amount Paid: <span id="totalAmountPaid" class="text-blue-600">$0.00</span>
@@ -171,6 +180,7 @@
         const modalBody = document.getElementById('modalBody');
         const totalOrdersSpan = document.getElementById('totalOrders');
         const totalAmountPaidSpan = document.getElementById('totalAmountPaid');
+        const totalAmountBilledSpan = document.getElementById('totalAmountBilled');
         const itemsTableBody = document.getElementById('itemsTableBody');
         const totalQuantitySoldSpan = document.getElementById('totalQuantitySold');
         const totalRevenueSpan = document.getElementById('totalRevenue');
@@ -211,11 +221,15 @@
                     row.className = 'hover:bg-gray-100 transition-colors duration-200 cursor-pointer';
                     const formattedDate = new Date(order.transactionDateTime).toLocaleString();
 
+                    const cardOrCash = order.isCard == 1 ? "Card" : "Cash";
+
                     row.innerHTML = `
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${order.orderId.substring(0, 8)}...</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cardOrCash}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${order.amountOwed.toFixed(2)}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${order.amountPaid.toFixed(2)}</td>
-                                    `;
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$${order.amountReturned.toFixed(2)}</td>
+                                        `;
 
                     // Add a click listener to the row to show the details modal
                     row.addEventListener('click', () => showOrderDetails(order));
@@ -271,21 +285,24 @@
         // Function to show order details in the modal
         function showOrderDetails(order) {
             const formattedDate = new Date(order.transactionDateTime).toLocaleString();
+            const cardOrCash = order.isCard == 1 ? "Card" : "Cash";
             modalBody.innerHTML = `
-                                <p><strong>Order ID:</strong> ${order.orderId}</p>
-                                <p><strong>Transaction Date:</strong> ${formattedDate}</p>
-                                <p><strong>Amount Paid:</strong> $${order.amountPaid.toFixed(2)}</p>
-                                <p><strong>Order Type:</strong> Concession</p>
-                                <h3 class="font-bold text-lg mt-4 mb-2">Items</h3>
-                                <ul class="list-disc list-inside space-y-2">
-                                    ${order.orderItems.map(item => `
-                                        <li class="flex justify-between items-center text-gray-700">
-                                            <span>${item.quantity} x ${item.itemName}</span>
-                                            <span>$${(item.quantity * item.unitPrice).toFixed(2)}</span>
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                            `;
+                                        <p class="text-xs"><strong>Order ID:</strong> ${order.orderId}</p>
+                                        <p><strong>Transaction Date:</strong> ${formattedDate}</p>
+                                        <p><strong>Payment Method:</strong> ${cardOrCash}</p>
+                                        <p><strong>Total:</strong> $${order.amountOwed.toFixed(2)}</p>
+                                        <p><strong>Paid:</strong> $${order.amountPaid.toFixed(2)}</p>
+                                        <p><strong>Returned:</strong> $${order.amountReturned.toFixed(2)}</p>
+                                        <h3 class="font-bold text-lg mt-4 mb-2">Items</h3>
+                                        <ul class="list-disc list-inside space-y-2">
+                                            ${order.orderItems.map(item => `
+                                                <li class="flex justify-between items-center text-gray-700">
+                                                    <span>${item.quantity} x ${item.itemName}</span>
+                                                    <span>$${(item.quantity * item.unitPrice).toFixed(2)}</span>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                       `;
 
             // Show the modal
             orderDetailsModal.classList.remove('hidden');
@@ -337,10 +354,11 @@
             // Calculate totals for the filtered data
             const totalOrders = filteredData.length;
             const totalAmountPaid = filteredData.reduce((sum, order) => sum + order.amountPaid, 0);
-
+            const totalAmountBilled = filteredData.reduce((sum, order) => sum + order.amountOwed, 0)
             // Update the totals in the summary div
             totalOrdersSpan.textContent = totalOrders;
             totalAmountPaidSpan.textContent = `$${totalAmountPaid.toFixed(2)}`;
+            totalAmountBilledSpan.textContent = `$${totalAmountBilled.toFixed(2)}`;
 
             renderTable(filteredData);
         }
